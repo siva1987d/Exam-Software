@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hall Ticket Seat Search</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding-top: 50px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      width: 300px;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>Search Your Seat</h2>
+  <input type="text" id="hallTicketInput" placeholder="Enter Hall Ticket Number" />
+  <br><br>
+  <button onclick="searchSeat()">Search</button>
+  <div id="result"></div>
+
+  <script>
+    const sheetId = "1ZedHo6kTDIjguC517Av_sc3ri9Fl5cnUirh-uoLvPnA";
+    const apiKey = "AIzaSyBScqZmlGr7WCaMQ7rwimkZZVwoE6tMURs";
+    const sheetName = "Room Info";
+
+    async function searchSeat() {
+      const hallTicket = document.getElementById("hallTicketInput").value.trim();
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "Searching...";
+
+      try {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}?key=${apiKey}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!data.values) {
+          resultDiv.innerHTML = "Failed to fetch data.";
+          return;
+        }
+
+        const rows = data.values;
+        let found = false;
+
+        for (let i = 1; i < rows.length; i++) {
+          const ticket = rows[i][0]?.trim();
+          if (ticket === hallTicket) {
+            const seat = rows[i][3] || "Not Assigned";
+            resultDiv.innerHTML = `Room Info: ${seat}`;
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) {
+          resultDiv.innerHTML = "Hall Ticket not found.";
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        resultDiv.innerHTML = "An error occurred.";
+      }
+    }
+  </script>
+</body>
+</html>
